@@ -1,0 +1,92 @@
+CREATE TABLE BOOKS(
+ISBN VARCHAR2(20),
+TITLE VARCHAR2(20),
+AUTHOR CHAR(20),
+PUBLISHER VARCHAR2(20),
+PRIMARY KEY(ISBN));
+
+CREATE TABLE STUDENTS(
+USN VARCHAR2(10) NOT NULL PRIMARY KEY,
+NAME CHAR(20),
+SEMESTER INT,
+DEPARTMENT VARCHAR2(10),
+GENDER CHAR(1));
+
+CREATE TABLE BORROWS( 
+ISBN VARCHAR2(20), 
+USN VARCHAR2(10), 
+DATEBORROWED DATE, 
+FOREIGN KEY(USN) REFERENCES STUDENTS(USN), 
+FOREIGN KEY(ISBN) REFERENCES BOOKS(ISBN), 
+PRIMARY KEY(ISBN,USN));
+
+INSERT INTO BOOKS 
+VALUES('&ISBN','&TITLE','&AURTHOR','&PUBLISHER');
+
+INSERT INTO STUDENTS
+VALUES('&USN','&NAME','&SEMESTER','&DEPARTMENT','&GENDER');
+
+INSERT INTO BORROWS
+VALUES('&ISBN','&USN','&DATEBORROWED');
+
+SELECT NAME FROM STUDENTS
+WHERE USN IN(SELECT USN FROM BORROWS
+             WHERE ISBN='ISB123' OR ISBN='ISB554');
+
+SELECT NAME
+FROM STUDENTS
+WHERE USN IN(SELECT USN 
+             FROM  BORROWS
+             WHERE ISBN IN(SELECT ISBN 
+                           FROM BOOKS
+                           WHERE TITLE='DATABASE')) AND GENDER='F';
+
+SELECT B.USN,NAME,COUNT(ISBN)
+FROM BORROWS B,STUDENTS S
+WHERE S.USN=B.USN
+GROUP BY B.USN,NAME;
+
+SELECT *
+FROM BOOKS 
+WHERE TITLE LIKE 'DA%' AND ISBN NOT IN(SELECT ISBN
+                                       FROM BORROWS);
+
+db.createCollection("Books")
+
+db.Books.insert({"ISBN":"B123","Title":"Database","Author":"Ramu","Publisher":"Sharma","borrowed_by":{"Student":"Owais","USN":"IS081","Dept":"ISE"}})
+db.Books.insert({"ISBN":"B124","Title":"Cloud","Author":"Rakesh","Publisher":"Verma","borrowed_by":{"Student":"Maitri","USN":"CS067","Dept":"CSE"}})
+db.Books.insert({"ISBN":"B125","Title":"Database","Author":"Ramu","Publisher":"Sharma","borrowed_by":{"Student":"Jeevika","USN":"IS055","Dept":"ISE"}})
+db.Books.insert({"ISBN":"B126","Title":"MC","Author":"Ravi","Publisher":"Cengage","borrowed_by":{"Student":"Prajwal","USN":"CS085","Dept":"CSE"}})
+
+db.Books.find().pretty()
+
+db.Books.find({"Author":"Ramu"}).pretty()
+
+db.Books.find({"Title":"Database"},{"borrowed_by.Student":1})
+
+SQL>CREATE OR REPLACE PROCEDURE FIBONACCI(N IN NUMBER)
+IS
+A NUMBER;
+B NUMBER;
+C NUMBER;
+I NUMBER;
+BEGIN
+     A:=0; B:=1;
+    DBMS_OUTPUT.PUT_LINE(A);
+    DBMS_OUTPUT.PUT_LINE(B);
+    FOR I IN 1..N-2 LOOP
+        C:=A+B;
+        DBMS_OUTPUT.PUT_LINE(C);
+        A:=B;
+        B:=C;
+    END LOOP;
+END FIBONACCI;
+
+EXEC FIBONACCI(8)
+
+DECLARE
+    N NUMBER:=&N;
+BEGIN
+    FIBONACCI(N);
+END;
+/

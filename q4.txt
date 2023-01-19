@@ -1,0 +1,90 @@
+CREATE TABLE CUSTOMER( 
+    CID VARCHAR2(10) NOT NULL PRIMARY KEY, 
+    NAME VARCHAR2(10), 
+    PHNO NUMBER(10));
+
+CREATE TABLE BRANCH (
+    BID VARCHAR2(10) NOT NULL PRIMARY KEY, 
+    BLOC VARCHAR2(20));
+
+CREATE TABLE ACCOUNT( 
+    CID VARCHAR2(20) REFERENCES CUSTOMER(CID), 
+    ACCNO NUMBER(12) NOT NULL PRIMARY KEY, 
+    BAL NUMBER(7), 
+    TYPE VARCHAR2(10), 
+    BID VARCHAR2(10) REFERENCES BRANCH(BID));
+
+CREATE TABLE TRANSACTION( 
+CID VARCHAR2(10) REFERENCES CUSTOMER(CID), 
+TID VARCHAR2(20) NOT NULL PRIMARY KEY, 
+ACCNO NUMBER(12) REFERENCES ACCOUNT(ACCNO), 
+AMT NUMBER(7), 
+TTYPE VARCHAR2(10));
+
+INSERT INTO CUSTOMER 
+VALUES('&CID','&NAME',&PHNO); 
+
+INSERT INTO BRANCH 
+VALUES('&BID','&BLOC');
+
+INSERT INTO ACCOUNT 
+VALUES('&CID',&ACCNO,&BAL,'&TYPE','&BID'); 
+
+INSERT INTO TRANSACTION 
+VALUES('&CID','&TID',&ACCNO,&AMT,'&TTYPE');
+
+SELECT * FROM CUSTOMER
+WHERE CID IN (
+    SELECT CID FROM ACCOUNT WHERE TYPE='SA'
+)
+AND CID IN (
+     SELECT CID FROM ACCOUNT WHERE TYPE='CA'
+);
+
+
+SELECT B.BID,BLOC,COUNT(ACCNO) 
+FROM ACCOUNT A JOIN BRANCH B ON A.BID=B.BID
+GROUP BY B.BID,BLOC;
+
+SELECT * 
+FROM CUSTOMER
+WHERE CID IN(SELECT CID 
+             FROM TRANSACTION 
+             GROUP BY CID 
+             HAVING COUNT(TID)>=3);
+
+SELECT B.BID,BLOC,COUNT(ACCNO) 
+FROM ACCOUNT A JOIN BRANCH B ON A.BID=B.BID
+GROUP BY B.BID,BLOC
+HAVING COUNT(ACCNO)<(SELECT AVG(COUNT(ACCNO)) 
+                           FROM ACCOUNT GROUP BY BID);
+
+db.createCollection("Bank")
+
+db.Bank.insertOne({name:'John',accno:85676989,balance:4500,bid:2,bname:"Richmond Road"})
+db.Bank.insertOne({name:'John',accno:634655656,balance:3000,bid:3,bname:"Ramaiah Nagar"})
+db.Bank.insertOne({name:'Sita',accno:63466556435,balance:500,bid:1,bname:"Kalasi palya"})
+db.Bank.insertOne({name:'Sita',accno:63466556435,balance:500,bid:2,bname:"Richmond Road"})
+
+db.Bank.findOne({bid:2},{bname:1})
+
+db.Bank.aggregate([{$group:{_id:"$name",tot_acc:{$sum:1}}}])
+
+
+create table branchcopy as
+(select * from branch
+Where 1 = 2);
+
+Declare 
+	Cursor c1 is select * from branch;
+	V_rec branch%rowtype;
+Begin
+	Open c1;
+	Loop
+	Fetch c1 into v_rec;
+	Exit when c1%not found;
+Insert into branchcopy values(v_rec.b_no, v_rec.addr);
+End loop;
+Close c1;
+End;
+/
